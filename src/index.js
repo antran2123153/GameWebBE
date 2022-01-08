@@ -1,7 +1,7 @@
 var createError = require("http-errors");
 var express = require("express");
 var logger = require("morgan");
-// const cors = require("cors");
+const cors = require("cors");
 const route = require("./routes");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config/.env" });
@@ -12,7 +12,7 @@ var app = express();
 const connectToDatabase = require("./config/db");
 connectToDatabase();
 
-// app.use(cors());
+app.use(cors());
 
 app.use(logger("dev"));
 app.use(express.json());

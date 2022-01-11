@@ -11,13 +11,8 @@ const app = express();
 
 dotenv.config({ path: "./config/.env" });
 
-const corsOptions = {
-  origin: "*",
-  credentials: true,
-  optionSuccessStatus: 200,
-};
 const cors = require("cors");
-app.use(cors(corsOptions));
+app.use(cors());
 
 connectToDatabase();
 

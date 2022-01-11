@@ -22,25 +22,18 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const checkUsername = await Account.findOne({
-      username: req.body.username,
-    });
-    if (checkUsername) return res.status(400).send("Username already !!");
-
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(req.body.password, salt);
     const account = new Account({
       fullname: req.body.fullname,
       birthday: req.body.birthday,
       username: req.body.username,
-      password: hashPassword,
+      password: req.body.password,
     });
     let model = new Account(account);
     model
       .save()
       .then((account) => {
-        const token = jwt.sign({ _id: account._id }, process.env.TOKEN_SECRET);
-        res.status(200).send({ token });
+        res.status(200);
+        res.send("Register successful!!!");
       })
       .catch((error) => res.send(error.message));
   } catch (error) {

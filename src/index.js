@@ -1,24 +1,25 @@
-var createError = require("http-errors");
-var express = require("express");
-var logger = require("morgan");
-const cors = require("cors");
-const route = require("./routes");
+const createError = require("http-errors");
 const dotenv = require("dotenv");
-dotenv.config({ path: "./config/.env" });
-
-const PORT = process.env.PORT || 4000;
-var app = express();
-
+const express = require("express");
+const logger = require("morgan");
+const route = require("./routes");
 const connectToDatabase = require("./config/db");
-connectToDatabase();
+
+const PORT = process.env.PORT || 3000;
+
+const app = express();
+
+dotenv.config({ path: "./config/.env" });
 
 const corsOptions = {
   origin: "*",
   credentials: true,
   optionSuccessStatus: 200,
 };
-
+const cors = require("cors");
 app.use(cors(corsOptions));
+
+connectToDatabase();
 
 app.use(logger("dev"));
 app.use(express.json());

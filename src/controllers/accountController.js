@@ -4,13 +4,12 @@ const jwt = require("jsonwebtoken");
 
 exports.login = async (req, res) => {
   try {
-    const account = await Account.findOne({ username: req.body.username });
+    const body = JSON.parse(req.body);
+
+    const account = await Account.findOne({ username: body.username });
     if (!account) return res.status(400).send("Username is not found");
 
-    const checkValid = await bcrypt.compare(
-      req.body.password,
-      account.password
-    );
+    const checkValid = await bcrypt.compare(body.password, account.password);
     if (!checkValid) return res.status(400).send("Invalid password");
 
     const token = jwt.sign({ _id: account._id }, process.env.TOKEN_SECRET);
@@ -22,20 +21,31 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const account = new Account({
-      fullname: req.body.fullname,
-      birthday: req.body.birthday,
-      username: req.body.username,
-      password: req.body.password,
+    const body = req.body;
+
+    const checkUsername = await Account.findOne({
+      username: body.username,
     });
-    let model = new Account(account);
+    if (checkUsername) return res.status(400).send("Username already !!");
+
+    const salt = await bcrypt.genSalt(10);
+
+    const hashPassword = await bcrypt.hash(body.password, salt);
+    let model = new Account({
+      fullname: body.fullname,
+      birthday: body.birthday,
+      username: body.username,
+      password: hashPassword,
+    });
     model
       .save()
       .then((account) => {
-        res.status(200);
-        res.send("Register successful!!!");
+        const token = jwt.sign({ _id: account._id }, "12bfo128b12olqk2bff");
+        res.status(200).send({ token });
       })
-      .catch((error) => res.send(error.message));
+      .catch((error) => {
+        res.send(error.message);
+      });
   } catch (error) {
     res.send(error.message);
   }
@@ -45,6 +55,7 @@ exports.get = async (req, res) => {
   try {
     const account = jwt.verify(req.header("token"), process.env.TOKEN_SECRET);
     const _id = account._id;
+    console.log(_id);
     Account.findById(_id)
       .exec()
       .then((info) => {
@@ -88,12 +99,10 @@ exports.update = async (req, res, next) => {
 
     const newAccount = new Account({
       _id: _id,
+      fullname: req.body.fullname,
+      birthday: req.body.birthday,
       username: req.body.username,
       password: hashPassword,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      phoneNumber: req.body.phoneNumber,
-      birthday: req.body.birthday,
     });
 
     Account.findByIdAndUpdate(_id, newAccount, { new: true })

@@ -1,24 +1,24 @@
 const createError = require("http-errors");
-const dotenv = require("dotenv");
 const express = require("express");
 const logger = require("morgan");
+const dotenv = require("dotenv");
 const route = require("./routes");
+const cors = require("cors");
 const connectToDatabase = require("./config/db");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 const app = express();
 
 dotenv.config({ path: "./config/.env" });
 
-const cors = require("cors");
-app.use(cors());
-
 connectToDatabase();
+
+app.use(cors());
 
 app.use(logger("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
 route(app);
 
